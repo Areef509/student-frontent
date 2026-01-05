@@ -1,6 +1,6 @@
 const API_URL = "https://node-student-api.onrender.com/students";
 
-// Load students
+// 🔹 Load all students
 async function loadStudents() {
   try {
     const res = await fetch(API_URL);
@@ -14,9 +14,24 @@ async function loadStudents() {
 
     data.forEach(s => {
       const li = document.createElement("li");
-      li.textContent = `${s.name} | ${s.dept} | Age: ${s.age}`;
+      li.innerHTML = `
+        ${s.name} | ${s.dept} | Age: ${s.age}
+        <button 
+          onclick="deleteStudent('${s._id}')"
+          style="
+            float:right;
+            background:red;
+            color:white;
+            border:none;
+            padding:4px 8px;
+            cursor:pointer;
+          ">
+          Delete
+        </button>
+      `;
       list.appendChild(li);
     });
+
   } catch (err) {
     document.getElementById("student-list").innerText =
       "Backend not reachable";
@@ -24,7 +39,7 @@ async function loadStudents() {
   }
 }
 
-// Add new student
+// 🔹 Add new student
 async function addStudent() {
   const name = document.getElementById("name").value;
   const dept = document.getElementById("dept").value;
@@ -35,20 +50,36 @@ async function addStudent() {
     return;
   }
 
-  await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, dept, age })
-  });
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, dept, age })
+    });
 
-  document.getElementById("name").value = "";
-  document.getElementById("dept").value = "";
-  document.getElementById("age").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("dept").value = "";
+    document.getElementById("age").value = "";
 
-  loadStudents();
+    loadStudents();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-// Load data on page open
+// 🔹 Delete student
+async function deleteStudent(id) {
+  try {
+    await fetch(`${API_URL}/${id}`, {
+      method: "DELETE"
+    });
+    loadStudents();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// 🔹 Load data on page open
 loadStudents();
